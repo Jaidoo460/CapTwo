@@ -16,17 +16,13 @@ public class User {
 
    public User() { }
 
-   public User(Long id, String username, String password,BigDecimal balance, String authorities) {
+   public User(Long id, String username, String password, String authorities) {
       this.id = id;
       this.username = username;
       this.password = password;
-      this.balance = balance;
       this.activated = true;
    }
 
-   public BigDecimal getBalance(){return balance;}
-
-   public void setBalance(BigDecimal balance){this.balance = balance;}
 
    public Long getId() {
       return id;

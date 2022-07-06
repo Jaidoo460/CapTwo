@@ -2,6 +2,8 @@ package com.techelevator.tenmo.controller;
 
 import javax.validation.Valid;
 
+import com.techelevator.tenmo.dao.AccountDao;
+import com.techelevator.tenmo.model.Account;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -31,11 +33,13 @@ public class AuthenticationController {
     private final TokenProvider tokenProvider;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private UserDao userDao;
+    private AccountDao accountDao;
 
-    public AuthenticationController(TokenProvider tokenProvider, AuthenticationManagerBuilder authenticationManagerBuilder, UserDao userDao) {
+    public AuthenticationController(TokenProvider tokenProvider, AuthenticationManagerBuilder authenticationManagerBuilder, UserDao userDao, AccountDao accountDao) {
         this.tokenProvider = tokenProvider;
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.userDao = userDao;
+        this.accountDao = accountDao;
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
@@ -62,13 +66,13 @@ public class AuthenticationController {
     }
 
     @RequestMapping(value = "/balance", method = RequestMethod.GET)
-    public BigDecimal getBalance(){
-        return userDao.balance();
+    public Account getBalance(){
+        return accountDao.getBalance();
     }
 
     @RequestMapping(value = "/transfer", method = RequestMethod.PUT)
     public void transfer(@Valid @RequestBody String userName, BigDecimal amount){
-        userDao.sendTransfer(userName,amount);
+        accountDao.setTransfer(userName,amount);
     }
 
     /**

@@ -15,7 +15,5 @@ public interface UserDao {
 
     boolean create(String username, String password);
 
-    BigDecimal balance();
-
-    boolean sendTransfer(String username, BigDecimal amount);
+//    boolean sendTransfer(String username, BigDecimal amount);
 }
