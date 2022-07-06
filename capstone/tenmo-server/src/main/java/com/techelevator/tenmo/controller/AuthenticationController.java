@@ -33,13 +33,12 @@ public class AuthenticationController {
     private final TokenProvider tokenProvider;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private UserDao userDao;
-    private AccountDao accountDao;
 
-    public AuthenticationController(TokenProvider tokenProvider, AuthenticationManagerBuilder authenticationManagerBuilder, UserDao userDao, AccountDao accountDao) {
+
+    public AuthenticationController(TokenProvider tokenProvider, AuthenticationManagerBuilder authenticationManagerBuilder, UserDao userDao) {
         this.tokenProvider = tokenProvider;
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.userDao = userDao;
-        this.accountDao = accountDao;
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
@@ -63,16 +62,6 @@ public class AuthenticationController {
         if (!userDao.create(newUser.getUsername(), newUser.getPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User registration failed.");
         }
-    }
-
-    @RequestMapping(value = "/balance", method = RequestMethod.GET)
-    public Account getBalance(){
-        return accountDao.getBalance();
-    }
-
-    @RequestMapping(value = "/transfer", method = RequestMethod.PUT)
-    public void transfer(@Valid @RequestBody String userName, BigDecimal amount){
-        accountDao.setTransfer(userName,amount);
     }
 
     /**

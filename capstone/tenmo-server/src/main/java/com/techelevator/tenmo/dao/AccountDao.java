@@ -8,14 +8,6 @@ public interface AccountDao {
 
     Account getBalance();
 
-    BigDecimal setTransfer(String user, BigDecimal amountToSend);
-
-    void seeTransfer();
-
-    void seeTransferById(long transferId);
-
-
-
-
+    Account getUserById(long userId);
 
 }
