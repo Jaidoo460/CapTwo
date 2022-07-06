@@ -2,6 +2,11 @@ package com.techelevator.tenmo.services;
 
 
 import com.techelevator.tenmo.model.UserCredentials;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.util.Scanner;
@@ -9,6 +14,11 @@ import java.util.Scanner;
 public class ConsoleService {
 
     private final Scanner scanner = new Scanner(System.in);
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    private String authToken = null;
+
+    private static final String API_BASE_URL = "http://localhost:8080/";
 
     public int promptForMenuSelection(String prompt) {
         int menuSelection;
@@ -84,8 +94,21 @@ public class ConsoleService {
         scanner.nextLine();
     }
 
+    public BigDecimal getBalance(){
+        BigDecimal balance = null;
+        ResponseEntity<BigDecimal> response = restTemplate.exchange(API_BASE_URL + "balance", HttpMethod.GET, makeAuthEntity(), BigDecimal.class);
+        balance = response.getBody();
+        return balance;
+    }
+
     public void printErrorMessage() {
         System.out.println("An error occurred. Check the log for details.");
+    }
+
+    private HttpEntity<Void> makeAuthEntity() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(authToken);
+        return new HttpEntity<>(headers);
     }
 
 }

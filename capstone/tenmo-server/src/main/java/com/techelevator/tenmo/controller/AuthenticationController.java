@@ -20,6 +20,8 @@ import com.techelevator.tenmo.model.User;
 import com.techelevator.tenmo.security.jwt.TokenProvider;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
+
 /**
  * Controller to authenticate users.
  */
@@ -57,6 +59,16 @@ public class AuthenticationController {
         if (!userDao.create(newUser.getUsername(), newUser.getPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User registration failed.");
         }
+    }
+
+    @RequestMapping(value = "/balance", method = RequestMethod.GET)
+    public BigDecimal getBalance(){
+        return userDao.balance();
+    }
+
+    @RequestMapping(value = "/transfer", method = RequestMethod.PUT)
+    public void transfer(@Valid @RequestBody String userName, BigDecimal amount){
+        userDao.sendTransfer(userName,amount);
     }
 
     /**
