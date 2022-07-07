@@ -6,8 +6,12 @@ import java.math.BigDecimal;
 
 public interface AccountDao {
 
-    Account getBalance();
+//    Account getBalance();
 
-    Account getUserById(long userId);
+//    Account getUserById(long userId);
+
+    Account getAccountByUserId(Long userId);
+
+    void updateBalance(Account account);
 
 }

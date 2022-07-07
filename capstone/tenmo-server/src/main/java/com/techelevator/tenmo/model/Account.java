@@ -2,10 +2,11 @@ package com.techelevator.tenmo.model;
 
 import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
+import java.util.Objects;
 
 public class Account {
 
-    private Long AccountId;
+    private Long accountId;
     private Long userId;
     private BigDecimal balance;
 
@@ -14,13 +15,13 @@ public class Account {
     }
 
     public Account(Long accountId, Long userId, BigDecimal balance) {
-        AccountId = accountId;
+        this.accountId = accountId;
         this.userId = userId;
         this.balance = balance;
     }
 
     public Long getAccountId() {
-        return AccountId;
+        return accountId;
     }
 
     public Long getUserId() {
@@ -31,15 +32,45 @@ public class Account {
         return balance;
     }
 
-    public void setAccountId(Long accountId) {
-        AccountId = accountId;
+    public void transfer(Account accountTo, BigDecimal amountToTransfer){
+        if(this.balance.compareTo(amountToTransfer) >= 0){
+            this.balance = this.balance.subtract(amountToTransfer);
+            accountTo.balance = accountTo.balance.add(amountToTransfer);
+        }else {
+            throw new InsufficientBalanceException(amountToTransfer + " exceeds the remaining balance of " + this.balance);
+        }
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    @Override
+    public boolean equals(Object o){
+        if(this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Account account = (Account) o;
+        return accountId == account.accountId &&
+                userId == account.userId &&
+                balance.equals(account.balance);
     }
 
-    public void setBalance(BigDecimal balance) {
-        this.balance = balance;
+    @Override
+    public int hasCode() { return Objects.hash(accountId, userId, balance); }
+
+    @Override
+    public String toString() {
+        return "Account{" +
+                "accountId=" + accountId +
+                ", userId=" + userId +
+                ", balance=" + balance +
+                '}';
     }
+    //    public void setAccountId(Long accountId) {
+//        AccountId = accountId;
+//    }
+//
+//    public void setUserId(Long userId) {
+//        this.userId = userId;
+//    }
+//
+//    public void setBalance(BigDecimal balance) {
+//        this.balance = balance;
+//    }
 }
