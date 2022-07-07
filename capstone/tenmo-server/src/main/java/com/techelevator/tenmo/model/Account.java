@@ -1,5 +1,7 @@
 package com.techelevator.tenmo.model;
 
+import com.techelevator.tenmo.Exceptions.InsufficentBalanceException;
+
 import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -32,12 +34,12 @@ public class Account {
         return balance;
     }
 
-    public void transfer(Account accountTo, BigDecimal amountToTransfer){
+    public void transfer(Account accountTo, BigDecimal amountToTransfer) throws InsufficentBalanceException {
         if(this.balance.compareTo(amountToTransfer) >= 0){
             this.balance = this.balance.subtract(amountToTransfer);
             accountTo.balance = accountTo.balance.add(amountToTransfer);
         }else {
-            throw new InsufficientBalanceException(amountToTransfer + " exceeds the remaining balance of " + this.balance);
+            throw new InsufficentBalanceException();
         }
     }
 
@@ -51,7 +53,7 @@ public class Account {
                 balance.equals(account.balance);
     }
 
-    @Override
+
     public int hasCode() { return Objects.hash(accountId, userId, balance); }
 
     @Override

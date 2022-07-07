@@ -80,6 +80,16 @@ public class JdbcUserDao implements UserDao {
         return true;
     }
 
+    @Override
+    public User getUserById(int userId){
+        String sql = "SELECT * FROM tenmo_user WHERE user_id = ?";
+        SqlRowSet result = jdbcTemplate.queryForRowSet(sql, userId);
+        if(result.next()){
+            return mapRowToUser(result);
+        }
+        throw new UsernameNotFoundException("User with Id: " + userId + " not found");
+    }
+
 //    @Override
 //    public BigDecimal balance(){
 //        //TODO might need to revise with SQL statements.

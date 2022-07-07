@@ -41,7 +41,7 @@ public class JdbcTransfersDao implements TransfersDao {
         List<Transfers> transfer = new ArrayList<>();
         SqlRowSet result = jdbcTemplate.queryForRowSet(SQL_SELECT_TRANSFER);
         while (result.next()) {
-            Transfers transfers = mapToRow(result);
+            Transfers transfers = mapRowToTransfer(result);
             transfer.add(transfers);
         }
         return transfer;
@@ -52,27 +52,30 @@ public class JdbcTransfersDao implements TransfersDao {
         String sql = SQL_SELECT_TRANSFER + "WHERE transfer_id = ?";
         SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transferId);
         if (result.next()) {
-            transfer = mapToRow(result);
+            transfer = mapRowToTransfer(result);
         }
         return transfer;
     }
 
     @Override
-    public Transfers setTransfer(Transfers newTransfer) {
+    public void setTransfer(Transfers newTransfer) {
 
         //TODO : error with sql and or update.
         String sql = "INSERT INTO transfer (transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (?, ?, ?, ?, ?, ?)";
 
-        Long newTransferId = getNextTransferId();
-        Long transferTypeId = getNextTransferId(newTransfer.getTransferType());
-        Long transferStatusId = getTransferStatusId(newTransfer.getTransferStatus());
-        Account fromAccount = accountDao.getAccountByUserId(newTransfer.getUserFrom().getId());
-        Account toAccount = accountDao.getAccountByUserId(newTransfer.getUserTo().getId());
+//        Long newTransferId = getNextTransferId();
+//        Transfers transferTypeId = getTransferTypeId(newTransfer.getTransferTypeId());
+//        //^^Used to be a long
+//        Transfers transferStatusId = getTransferStatusId(newTransfer.getTransferStatusId());
+//        //^^Used to be a long
+//        Account fromAccount = accountDao.getAccountByUserId(newTransfer.getAccountFrom().getUserId());
+//        Account toAccount = accountDao.getAccountByUserId(newTransfer.getAccountTo().getUserId());
 
-        jdbcTemplate.update(sql, newTransferId, transferTypeId, transferStatusId, fromAccount.getAccountId(), toAccount.getAccountId(), newTransfer.getAmount());
-        log.debug("created new Transfer with ID: " + newTransferId);
+        //jdbcTemplate.update(sql, newTransferId, transferTypeId, transferStatusId, fromAccount.getAccountId(), toAccount.getAccountId(), newTransfer.getAmount());
+        jdbcTemplate.update(sql,newTransfer.getTransferId(), newTransfer.getTransferTypeId(), newTransfer.getTransferStatusId(), newTransfer.getAccountFrom(), newTransfer.getAccountTo(), newTransfer.getAmount());
+        //log.debug("created new Transfer with ID: " + newTransferId);
 
-        return getTransferById(newTransferId);
+        //return getTransferId(newTransferId);
     }
 
 
@@ -117,45 +120,70 @@ public class JdbcTransfersDao implements TransfersDao {
     @Override
     public void updateStatus(Transfers transfer){
         String sql = "UPDATE transfer SET transfer_status_id = ? WHERE transfer_id = ?";
-        Long transferStatusId = getTransferStatusId(transfer.getTransferStatus());
-        jdbcTemplate.update(sql, transferStatusId, transfer.getTransferId());
+        //Long transferStatusId = getTransferStatusId(transfer.getTransferStatus());
+        jdbcTemplate.update(sql, transfer.getTransferStatusId(), transfer.getTransferId());
     }
 
     private long getNextTransferId(){
         SqlRowSet nextIdResult = jdbcTemplate.queryForRowSet("SELECT nextval('seq_transfer_id')");
-        if(nextIdResult.next().next()){
+        if(nextIdResult.next()){
             return nextIdResult.getLong(1);
         }else{
             throw new RuntimeException("Something went wrong while getting an id for the new transfer");
         }
     }
 
-    private Long getTransferTypeId(String transferType){
-        String sql = "SELECT transfer_type_id FROM transfer_type WHERE transfer_type_desc = ?";
+    private Transfers getTransferTypeId(String transferType){
+        String sql = "SELECT transfer_type_id, transfer_type_desc FROM transfer_type WHERE  transfer_type_desc = ?";
+
         SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transferType);
+        Transfers transfersType = null;
+
         if(result.next()){
-            return result.getLong(1);
-        }else {
-            throw new RuntimeException("Unable to lookup transferType " + transferType);
+            int transferTypeId = result.getInt("transfer_type_id");
+            String transferTypeDesc = result.getString("transfer_type_desc");
+
+            transfersType = new Transfers(transferTypeId, transferTypeDesc);
+
         }
+        return transfersType;
+//        String sql = "SELECT transfer_type_id FROM transfer_type WHERE transfer_type_desc = ?";
+//        SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transferType);
+//        if(result.next()){
+//            return result.getLong(1);
+//        }else {
+//            throw new RuntimeException("Unable to lookup transferType " + transferType);
+//        }
     }
 
-   private Long getTransferStatusId(String transferStatus){
-        String sql = "SELECT transfer_status_id FROM transfer_status WHERE transfer_status_desc = ?";
+   private Transfers getTransferStatusId(String transferStatus){
+
+        String sql = "SELECT transfer_status_id, transfer_status_desc FROM transfer_status WHERE transfer_status_desc = ?";
         SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transferStatus);
-       if(result.next()){
-           return result.getLong(1);
-       }else {
-           throw new RuntimeException("Unable to lookup transferStatus " + transferStatus);
-       }
+
+        Transfers transfersStatus = null;
+
+        if(result.next()){
+            int transferStatusId = result.getInt("transfer_status_id");
+            String transferStatusDesc = result.getString("transfer_status_desc");
+            transfersStatus = new Transfers(transferStatusId, transferStatusDesc);
+        }
+        return transfersStatus;
+//        String sql = "SELECT transfer_status_id FROM transfer_status WHERE transfer_status_desc = ?";
+//        SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transferStatus);
+//       if(result.next()){
+//           return result.getLong(1);
+//       }else {
+//           throw new RuntimeException("Unable to lookup transferStatus " + transferStatus);
+//       }
    }
 
    private Transfers mapRowToTransfer(SqlRowSet rs){
         return new Transfers(rs.getLong("transfer_id"),
                             rs.getString("transfer_type_desc"),
                             rs.getString("transfer_status_desc"),
-                            userDao.getUserById(rs.getLong("fromUser")),
-                            userDao.getUserById(rs.getLong("toUser")),
+                            accountDao.getAccountByUserId(rs.getLong("accountFrom")),
+                            accountDao.getAccountByUserId(rs.getLong("accountTo")),
                             rs.getBigDecimal("amount"));
    }
 
