@@ -10,7 +10,7 @@ public interface TransfersDao {
     List<Transfers> findAll();
 
 
-    void setTransfer(Transfers transfer);
+    Transfers setTransfer(Transfers transfer);
 
     Transfers getTransferId(Long transferId);
 

@@ -10,13 +10,13 @@ public class Account {
 
     private Long accountId;
     private Long userId;
-    private BigDecimal balance;
+    private Balance balance;
 
     public Account(){
 
     }
 
-    public Account(Long accountId, Long userId, BigDecimal balance) {
+    public Account(Long accountId, Long userId, Balance balance) {
         this.accountId = accountId;
         this.userId = userId;
         this.balance = balance;
@@ -30,18 +30,18 @@ public class Account {
         return userId;
     }
 
-    public BigDecimal getBalance() {
+    public Balance getBalance() {
         return balance;
     }
 
-    public void transfer(Account accountTo, BigDecimal amountToTransfer) throws InsufficentBalanceException {
-        if(this.balance.compareTo(amountToTransfer) >= 0){
-            this.balance = this.balance.subtract(amountToTransfer);
-            accountTo.balance = accountTo.balance.add(amountToTransfer);
-        }else {
-            throw new InsufficentBalanceException();
-        }
-    }
+//    public void transfer(Account accountTo, Balance amountToTransfer) throws InsufficentBalanceException {
+//        if(this.balance.compareTo(amountToTransfer) >= 0){
+//            this.balance = this.balance.subtract(amountToTransfer);
+//            accountTo.balance = accountTo.balance.add(amountToTransfer);
+//        }else {
+//            throw new InsufficentBalanceException();
+//        }
+//    }
 
     @Override
     public boolean equals(Object o){

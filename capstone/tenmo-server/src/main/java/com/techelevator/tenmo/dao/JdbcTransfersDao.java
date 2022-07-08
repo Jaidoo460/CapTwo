@@ -58,24 +58,24 @@ public class JdbcTransfersDao implements TransfersDao {
     }
 
     @Override
-    public void setTransfer(Transfers newTransfer) {
+    public Transfers setTransfer(Transfers newTransfer) {
 
         //TODO : error with sql and or update.
         String sql = "INSERT INTO transfer (transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (?, ?, ?, ?, ?, ?)";
 
-//        Long newTransferId = getNextTransferId();
-//        Transfers transferTypeId = getTransferTypeId(newTransfer.getTransferTypeId());
-//        //^^Used to be a long
-//        Transfers transferStatusId = getTransferStatusId(newTransfer.getTransferStatusId());
-//        //^^Used to be a long
-//        Account fromAccount = accountDao.getAccountByUserId(newTransfer.getAccountFrom().getUserId());
-//        Account toAccount = accountDao.getAccountByUserId(newTransfer.getAccountTo().getUserId());
+        Long newTransferId = getNextTransferId();
+        Transfers transferTypeId = getTransferTypeId(newTransfer.getTransferTypeId());
+        //^^Used to be a long
+        Transfers transferStatusId = getTransferStatusId(newTransfer.getTransferStatusId());
+        //^^Used to be a long
+        Account fromAccount = accountDao.getAccountByUserId(newTransfer.getAccountFrom());
+        Account toAccount = accountDao.getAccountByUserId(newTransfer.getAccountTo());
 
-        //jdbcTemplate.update(sql, newTransferId, transferTypeId, transferStatusId, fromAccount.getAccountId(), toAccount.getAccountId(), newTransfer.getAmount());
-        jdbcTemplate.update(sql,newTransfer.getTransferId(), newTransfer.getTransferTypeId(), newTransfer.getTransferStatusId(), newTransfer.getAccountFrom(), newTransfer.getAccountTo(), newTransfer.getAmount());
-        //log.debug("created new Transfer with ID: " + newTransferId);
+        jdbcTemplate.update(sql, newTransferId, transferTypeId, transferStatusId, fromAccount.getAccountId(), toAccount.getAccountId(), newTransfer.getAmount());
+        //jdbcTemplate.update(sql,newTransfer.getTransferId(), newTransfer.getTransferTypeId(), newTransfer.getTransferStatusId(), newTransfer.getAccountFrom(), newTransfer.getAccountTo(), newTransfer.getAmount());
+        log.debug("created new Transfer with ID: " + newTransferId);
 
-        //return getTransferId(newTransferId);
+        return getTransferId(newTransferId);
     }
 
 
@@ -179,12 +179,23 @@ public class JdbcTransfersDao implements TransfersDao {
    }
 
    private Transfers mapRowToTransfer(SqlRowSet rs){
-        return new Transfers(rs.getLong("transfer_id"),
-                            rs.getString("transfer_type_desc"),
-                            rs.getString("transfer_status_desc"),
-                            accountDao.getAccountByUserId(rs.getLong("accountFrom")),
-                            accountDao.getAccountByUserId(rs.getLong("accountTo")),
-                            rs.getBigDecimal("amount"));
+        //TODO drastic changes made!
+
+       Long transferId = rs.getLong("transfer_id");
+       String transferTypeId = rs.getString("transfer_type_id");
+       String transferStatusId = rs.getString("transfer_status_id");
+       Long accountFrom = rs.getLong("account_from");
+       Long accountTo = rs.getLong("account_to");
+       String amount = rs.getString("amount");
+
+       Transfers transfer = new Transfers(transferId, transferTypeId, transferStatusId, accountFrom, accountTo, new BigDecimal(amount));
+       return transfer;
+//        return new Transfers(rs.getLong("transfer_id"),
+//                            rs.getString("transfer_type_desc"),
+//                            rs.getString("transfer_status_desc"),
+//                            accountDao.getAccountByUserId(rs.getLong("accountFrom")),
+//                            accountDao.getAccountByUserId(rs.getLong("accountTo")),
+//                            rs.getBigDecimal("amount"));
    }
 
 }

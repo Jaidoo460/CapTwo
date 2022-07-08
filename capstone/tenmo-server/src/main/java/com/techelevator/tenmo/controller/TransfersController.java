@@ -1,11 +1,12 @@
 package com.techelevator.tenmo.controller;
 
+import com.techelevator.tenmo.Exceptions.InsufficentBalanceException;
+import com.techelevator.tenmo.dao.AccountDao;
 import com.techelevator.tenmo.dao.TransfersDao;
+import com.techelevator.tenmo.dao.UserDao;
+import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transfers;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.math.BigDecimal;
@@ -13,13 +14,28 @@ import java.math.BigDecimal;
 @RestController
 public class TransfersController {
     private TransfersDao transfersDao;
+    private AccountDao accountDao;
+    private UserDao userDao;
 
-    public TransfersController(TransfersDao transfersDao) {
+    public TransfersController(TransfersDao transfersDao, AccountDao accountDao, UserDao userDao) {
         this.transfersDao = transfersDao;
+        this.accountDao = accountDao;
+        this.userDao = userDao;
     }
 
-    @RequestMapping(value = "/transfer", method = RequestMethod.POST)
-    public void transfer(@Valid Transfers transfer) {
+    @RequestMapping(value = "/transfer/{id}", method = RequestMethod.POST)
+    public void transfer(@RequestBody Transfers transfer, @PathVariable int id) throws InsufficentBalanceException {
+        //transfersDao.setTransfer(transfer);
+        BigDecimal amountToTransfer = transfer.getAmount();
+        Account accountFrom = accountDao.getAccountByUserId(transfer.getAccountFrom());
+        Account accountTo = accountDao.getAccountByUserId(transfer.getAccountTo());
+
+        accountFrom.getBalance().sendMoney(amountToTransfer);
+        accountTo.getBalance().receiveMoney(amountToTransfer);
+
         transfersDao.setTransfer(transfer);
+
+        accountDao.updateBalance(accountFrom);
+        accountDao.updateBalance(accountTo);
     }
 }
