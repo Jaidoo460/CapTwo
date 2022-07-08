@@ -71,22 +71,11 @@ public class JdbcTransfersDao implements TransfersDao {
         Account fromAccount = accountDao.getAccountByUserId(newTransfer.getAccountFrom());
         Account toAccount = accountDao.getAccountByUserId(newTransfer.getAccountTo());
 
-        jdbcTemplate.update(sql, newTransferId, transferTypeId, transferStatusId, fromAccount.getAccountId(), toAccount.getAccountId(), newTransfer.getAmount());
-        //jdbcTemplate.update(sql,newTransfer.getTransferId(), newTransfer.getTransferTypeId(), newTransfer.getTransferStatusId(), newTransfer.getAccountFrom(), newTransfer.getAccountTo(), newTransfer.getAmount());
+        jdbcTemplate.update(sql, newTransferId, 2, 2, fromAccount.getAccountId(), toAccount.getAccountId(), newTransfer.getAmount());
         log.debug("created new Transfer with ID: " + newTransferId);
 
         return getTransferId(newTransferId);
     }
-
-
-//        jdbcTemplate.update(sql, transfer.getTransferId(), transfer.getTransferTypeId(), transfer.getTransferStatusId(), accountDao.getUserById(transfer.getAccountFrom().getUserId()), accountDao.getUserById(transfer.getAccountTo().getUserId()), transfer.getAmount());
-//        SqlRowSet result = jdbcTemplate.queryForRowSet(sql,transfer);
-
-//        if(result.next()){
-//            transfer = mapToRow(result);
-//        }
-//        return transfer;
-
 
     @Override
     public List<Transfers> getTransfersForUser(Long userId) {
@@ -147,13 +136,6 @@ public class JdbcTransfersDao implements TransfersDao {
 
         }
         return transfersType;
-//        String sql = "SELECT transfer_type_id FROM transfer_type WHERE transfer_type_desc = ?";
-//        SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transferType);
-//        if(result.next()){
-//            return result.getLong(1);
-//        }else {
-//            throw new RuntimeException("Unable to lookup transferType " + transferType);
-//        }
     }
 
    private Transfers getTransferStatusId(String transferStatus){
@@ -169,52 +151,21 @@ public class JdbcTransfersDao implements TransfersDao {
             transfersStatus = new Transfers(transferStatusId, transferStatusDesc);
         }
         return transfersStatus;
-//        String sql = "SELECT transfer_status_id FROM transfer_status WHERE transfer_status_desc = ?";
-//        SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transferStatus);
-//       if(result.next()){
-//           return result.getLong(1);
-//       }else {
-//           throw new RuntimeException("Unable to lookup transferStatus " + transferStatus);
-//       }
    }
 
    private Transfers mapRowToTransfer(SqlRowSet rs){
         //TODO drastic changes made!
 
        Long transferId = rs.getLong("transfer_id");
-       String transferTypeId = rs.getString("transfer_type_id");
-       String transferStatusId = rs.getString("transfer_status_id");
-       Long accountFrom = rs.getLong("account_from");
-       Long accountTo = rs.getLong("account_to");
+       String transferTypeId = rs.getString("transfer_type_desc");
+       String transferStatusId = rs.getString("transfer_status_desc");
+       Long accountFrom = rs.getLong("fromAcct");
+       Long accountTo = rs.getLong("toAcct");
        String amount = rs.getString("amount");
 
        Transfers transfer = new Transfers(transferId, transferTypeId, transferStatusId, accountFrom, accountTo, new BigDecimal(amount));
        return transfer;
-//        return new Transfers(rs.getLong("transfer_id"),
-//                            rs.getString("transfer_type_desc"),
-//                            rs.getString("transfer_status_desc"),
-//                            accountDao.getAccountByUserId(rs.getLong("accountFrom")),
-//                            accountDao.getAccountByUserId(rs.getLong("accountTo")),
-//                            rs.getBigDecimal("amount"));
    }
 
 }
-
-
-//    public void seeTransferById(long transferId) {
-//        Transfers transfer = null;
-//        String sql = "SELECT * FROM transfer WHERE transfer_id = ?";
-//
-//    }
-
-//    private Transfers mapToRow (SqlRowSet sr){
-//        Transfers tr = new Transfers();
-//        tr.setTransferId(sr.getLong("transfer_id"));
-//        tr.setTransferTypeId(sr.getLong("transfer_type_id"));
-//        tr.setTransferStatusId(sr.getLong("transfer_status_id"));
-//        tr.setAccountFrom(accountDao.getUserById(sr.getLong("account_from")));
-//        tr.setAccountTo(accountDao.getUserById(sr.getLong("account_to")));
-//        tr.setAmount(sr.getBigDecimal("amount"));
-//
-//        return tr;
 

@@ -89,49 +89,14 @@ public class JdbcUserDao implements UserDao {
         }
         throw new UsernameNotFoundException("User with Id: " + userId + " not found");
     }
-
-//    @Override
-//    public BigDecimal balance(){
-//        //TODO might need to revise with SQL statements.
-//        BigDecimal accountBal = STARTING_BALANCE;
-//        return accountBal;
-//    }
-//    @Override
-//    public boolean sendTransfer(String username, BigDecimal amount){
-//        //subtract amount from user balance
-//
-//
-//        //add to other accounts balance
-//        String sql = "INSERT INTO account (user_id, amount) values(?, ?)";
-//        try{
-//            jdbcTemplate.update(sql,username,amount);
-//            user.setBalance(balance().add(amount));
-//        }catch (DataAccessException da){
-//            System.out.println(da.getMessage());
-//            return false;
-//        }
-//        return true;
-//    }
-
+    
     private User mapRowToUser(SqlRowSet rs) {
         User user = new User();
         user.setId(rs.getLong("user_id"));
         user.setUsername(rs.getString("username"));
         user.setPassword(rs.getString("password_hash"));
-////        if (rs.getBigDecimal("balance") != null){
-//            user.setBalance(rs.getBigDecimal("balance"));
-////        }
         user.setActivated(true);
         user.setAuthorities("USER");
         return user;
     }
-
-//    private User mapRowToUserAfterLogin(SqlRowSet rs) {
-//        User user = new User();
-//        user.setId(rs.getLong("user_id"));
-//        user.setUsername(rs.getString("username"));
-//        user.setPassword(rs.getString("password_hash"));
-//
-//        return user;
-//    }
 }

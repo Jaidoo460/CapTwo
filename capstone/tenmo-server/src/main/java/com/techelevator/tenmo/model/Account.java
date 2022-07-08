@@ -46,14 +46,6 @@ public class Account {
         return balance;
     }
 
-//    public void transfer(Account accountTo, Balance amountToTransfer) throws InsufficentBalanceException {
-//        if(this.balance.compareTo(amountToTransfer) >= 0){
-//            this.balance = this.balance.subtract(amountToTransfer);
-//            accountTo.balance = accountTo.balance.add(amountToTransfer);
-//        }else {
-//            throw new InsufficentBalanceException();
-//        }
-//    }
 
     @Override
     public boolean equals(Object o){
@@ -76,15 +68,5 @@ public class Account {
                 ", balance=" + balance +
                 '}';
     }
-    //    public void setAccountId(Long accountId) {
-//        AccountId = accountId;
-//    }
-//
-//    public void setUserId(Long userId) {
-//        this.userId = userId;
-//    }
-//
-//    public void setBalance(BigDecimal balance) {
-//        this.balance = balance;
-//    }
+
 }

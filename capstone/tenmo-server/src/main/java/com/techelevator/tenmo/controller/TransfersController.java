@@ -28,9 +28,11 @@ public class TransfersController {
     @RequestMapping(path = "/transfer/{id}", method = RequestMethod.POST)
     public void transfer(@RequestBody Transfers transfer, @PathVariable int id) throws InsufficentBalanceException {
         //transfersDao.setTransfer(transfer);
+        transfer.setTransferTypeId("Sent");
+        transfer.setTransferStatusId("Approved");
         BigDecimal amountToTransfer = transfer.getAmount();
-        Account accountFrom = accountDao.getAccountByAccountId(transfer.getAccountFrom());
-        Account accountTo = accountDao.getAccountByAccountId(transfer.getAccountTo());
+        Account accountFrom = accountDao.getAccountByUserId(transfer.getAccountFrom());
+        Account accountTo = accountDao.getAccountByUserId(transfer.getAccountTo());
 
         accountFrom.getBalance().sendMoney(amountToTransfer);
         accountTo.getBalance().receiveMoney(amountToTransfer);
