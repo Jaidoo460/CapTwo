@@ -12,18 +12,11 @@ public interface TransfersDao {
 
     Transfers setTransfer(Transfers transfer);
 
-    Transfers getTransferId(Long transferId);
+    Transfers getTransferId(long transferId);
 
-    List<Transfers> getTransfersForUser(Long userId);
+    List<Transfers> getTransfersForUser(long userId);
 
-    List<Transfers> getPendingTransfersForUser(Long userId);
-
-    void updateStatus(Transfers transfer);
+    //List<Transfers> getPendingTransfersForUser(Long userId);
 
 
-//    Transfers setTransfer(Transfers transfer);
-
-//    void seeTransfer();
-
-//    void seeTransferById(long transferId);
 }

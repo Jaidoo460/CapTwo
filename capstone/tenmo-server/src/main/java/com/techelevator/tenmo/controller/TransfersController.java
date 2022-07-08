@@ -31,8 +31,8 @@ public class TransfersController {
         transfer.setTransferTypeId("Sent");
         transfer.setTransferStatusId("Approved");
         BigDecimal amountToTransfer = transfer.getAmount();
-        Account accountFrom = accountDao.getAccountByUserId(transfer.getAccountFrom());
-        Account accountTo = accountDao.getAccountByUserId(transfer.getAccountTo());
+        Account accountFrom = accountDao.getAccountByAccountId(transfer.getAccountFrom());
+        Account accountTo = accountDao.getAccountByAccountId(transfer.getAccountTo());
 
         accountFrom.getBalance().sendMoney(amountToTransfer);
         accountTo.getBalance().receiveMoney(amountToTransfer);

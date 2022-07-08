@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -19,6 +20,8 @@ public class JdbcTransfersDao implements TransfersDao {
     private AccountDao accountDao;
     private JdbcTemplate jdbcTemplate;
     private UserDao userDao;
+    private List<Transfers> transfers = new ArrayList<>();
+
 
     private static final String SQL_SELECT_TRANSFER = "SELECT t.transfer_id, tt.transfer_type_desc, ts.transfer_status_desc, t.amount, " +
             "aFrom.account_id as fromAcct, aFrom.user_id as fromUser, aFrom.balance as fromBal, " +
@@ -27,8 +30,7 @@ public class JdbcTransfersDao implements TransfersDao {
             "INNER JOIN transfer_type tt ON t.transfer_type_id = tt.transfer_type_id " +
             "INNER JOIN transfer_status ts ON t.transfer_status_id = ts.transfer_status_id " +
             "INNER JOIN account aFrom on account_from = aFrom.account_id " +
-            "INNER JOIN account aTo on account_to = aTo.account_id ";
-
+            "INNER JOIN account aTo on account_to = aTo.account_id";
 
     public JdbcTransfersDao(JdbcTemplate jdbcTemplate, AccountDao accountDao, UserDao userDao) {
         this.jdbcTemplate = jdbcTemplate;
@@ -38,21 +40,23 @@ public class JdbcTransfersDao implements TransfersDao {
 
     @Override
     public List<Transfers> findAll() {
-        List<Transfers> transfer = new ArrayList<>();
-        SqlRowSet result = jdbcTemplate.queryForRowSet(SQL_SELECT_TRANSFER);
-        while (result.next()) {
-            Transfers transfers = mapRowToTransfer(result);
-            transfer.add(transfers);
+        List<Transfers> transfers = new ArrayList<>();
+        String sql = "SELECT * FROM transfer;";
+
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
+        while (results.next()){
+            transfers.add(mapRowToTransfer(results));
         }
-        return transfer;
+        return transfers;
     }
 
-    public Transfers getTransferId(Long transferId) {
+    @Override
+    public Transfers getTransferId(long transferId) {
         Transfers transfer = null;
         String sql = SQL_SELECT_TRANSFER + "WHERE transfer_id = ?";
-        SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transferId);
-        if (result.next()) {
-            transfer = mapRowToTransfer(result);
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, transferId);
+        if (results.next()) {
+            transfer = mapRowToTransfer(results);
         }
         return transfer;
     }
@@ -60,57 +64,25 @@ public class JdbcTransfersDao implements TransfersDao {
     @Override
     public Transfers setTransfer(Transfers newTransfer) {
 
-        //TODO : error with sql and or update.
         String sql = "INSERT INTO transfer (transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (?, ?, ?, ?, ?, ?)";
 
-        Long newTransferId = getNextTransferId();
-        Transfers transferTypeId = getTransferTypeId(newTransfer.getTransferTypeId());
-        //^^Used to be a long
-        Transfers transferStatusId = getTransferStatusId(newTransfer.getTransferStatusId());
-        //^^Used to be a long
-        Account fromAccount = accountDao.getAccountByUserId(newTransfer.getAccountFrom());
-        Account toAccount = accountDao.getAccountByUserId(newTransfer.getAccountTo());
+        Long transferId = getNextTransferId();
+        jdbcTemplate.update(sql,getNextTransferId(),2,2,newTransfer.getAccountFrom(), newTransfer.getAccountTo(), newTransfer.getAmount());
 
-        jdbcTemplate.update(sql, newTransferId, 2, 2, fromAccount.getAccountId(), toAccount.getAccountId(), newTransfer.getAmount());
-        log.debug("created new Transfer with ID: " + newTransferId);
-
-        return getTransferId(newTransferId);
+        return getTransferId(transferId);
     }
 
     @Override
-    public List<Transfers> getTransfersForUser(Long userId) {
-        List<Transfers> transfer = new ArrayList<>();
-        String sql = SQL_SELECT_TRANSFER + "" +
-                "WHERE (account_from IN (SELECT account_id FROM account WHERE user_id = ?) " +
+    public List<Transfers> getTransfersForUser(long userId) {
+
+        List<Transfers> transfers = new ArrayList<>();
+        String sql = SQL_SELECT_TRANSFER + "WHERE (account_from IN (SELECT account_id FROM account WHERE user_id = ?) " +
                 "OR account_to IN (SELECT account_id FROM account WHERE user_id = ?))";
-
-        SqlRowSet result = jdbcTemplate.queryForRowSet(sql, userId, userId);
-        while (result.next()) {
-            Transfers transfers = mapRowToTransfer(result);
-            transfer.add(transfers);
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, userId);
+        while (results.next()) {
+            transfers.add(mapRowToTransfer(results));
         }
-        return transfer;
-    }
-
-
-    @Override
-    public List<Transfers> getPendingTransfersForUser(Long userId) {
-        List<Transfers> transfer = new ArrayList<>();
-        String sql = SQL_SELECT_TRANSFER + "WHERE transfer_status_id = 1 AND account_from IN (SELECT account_id FROM account WHERE user_id = ?)";
-        SqlRowSet result = jdbcTemplate.queryForRowSet(sql, userId);
-        while (result.next()) {
-            Transfers transfers = mapRowToTransfer(result);
-            transfer.add(transfers);
-        }
-        return transfer;
-
-    }
-
-    @Override
-    public void updateStatus(Transfers transfer){
-        String sql = "UPDATE transfer SET transfer_status_id = ? WHERE transfer_id = ?";
-        //Long transferStatusId = getTransferStatusId(transfer.getTransferStatus());
-        jdbcTemplate.update(sql, transfer.getTransferStatusId(), transfer.getTransferId());
+        return transfers;
     }
 
     private long getNextTransferId(){
@@ -118,54 +90,20 @@ public class JdbcTransfersDao implements TransfersDao {
         if(nextIdResult.next()){
             return nextIdResult.getLong(1);
         }else{
-            throw new RuntimeException("Something went wrong while getting an id for the new transfer");
+            throw new RuntimeException("Sorry something happened while getting an ID");
         }
     }
-
-    private Transfers getTransferTypeId(String transferType){
-        String sql = "SELECT transfer_type_id, transfer_type_desc FROM transfer_type WHERE  transfer_type_desc = ?";
-
-        SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transferType);
-        Transfers transfersType = null;
-
-        if(result.next()){
-            int transferTypeId = result.getInt("transfer_type_id");
-            String transferTypeDesc = result.getString("transfer_type_desc");
-
-            transfersType = new Transfers(transferTypeId, transferTypeDesc);
-
-        }
-        return transfersType;
-    }
-
-   private Transfers getTransferStatusId(String transferStatus){
-
-        String sql = "SELECT transfer_status_id, transfer_status_desc FROM transfer_status WHERE transfer_status_desc = ?";
-        SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transferStatus);
-
-        Transfers transfersStatus = null;
-
-        if(result.next()){
-            int transferStatusId = result.getInt("transfer_status_id");
-            String transferStatusDesc = result.getString("transfer_status_desc");
-            transfersStatus = new Transfers(transferStatusId, transferStatusDesc);
-        }
-        return transfersStatus;
-   }
 
    private Transfers mapRowToTransfer(SqlRowSet rs){
         //TODO drastic changes made!
-
-       Long transferId = rs.getLong("transfer_id");
-       String transferTypeId = rs.getString("transfer_type_desc");
-       String transferStatusId = rs.getString("transfer_status_desc");
-       Long accountFrom = rs.getLong("fromAcct");
-       Long accountTo = rs.getLong("toAcct");
-       String amount = rs.getString("amount");
-
-       Transfers transfer = new Transfers(transferId, transferTypeId, transferStatusId, accountFrom, accountTo, new BigDecimal(amount));
+       Transfers transfer = new Transfers();
+       transfer.setTransferId(rs.getLong("transfer_id"));
+       transfer.setTransferTypeId(rs.getString("transfer_type_desc"));
+       transfer.setTransferStatusId(rs.getString("transfer_status_desc"));
+       transfer.setAccountFrom(rs.getLong("fromAcct"));
+       transfer.setAccountTo(rs.getLong("toAcct"));
+       transfer.setAmount(rs.getBigDecimal("amount"));
        return transfer;
    }
-
 }
 

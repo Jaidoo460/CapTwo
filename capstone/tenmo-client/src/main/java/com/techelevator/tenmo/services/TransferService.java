@@ -5,7 +5,7 @@ import com.techelevator.tenmo.model.Transfer;
 
 public interface TransferService {
 
-    void setTransfer(AuthenticatedUser authenticatedUser, Transfer transfer);
+    Transfer setTransfer(AuthenticatedUser authenticatedUser, Transfer transfer);
 
     Transfer[] getTransfersFromUserId(AuthenticatedUser authenticatedUser, long userId);
 
@@ -13,7 +13,6 @@ public interface TransferService {
 
     Transfer[] getAllTransfers(AuthenticatedUser authenticatedUser);
 
-    //optional part Transfer[] getPendingTransfersByUserId(AuthenticatedUser authenticatedUser);
 
-    void updateTransfer(AuthenticatedUser authenticatedUser, Transfer transfer);
+
 }

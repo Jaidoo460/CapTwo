@@ -10,18 +10,20 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpHeaders;
 
+import java.math.BigDecimal;
+
 
 public class TrueTransferService implements TransferService{
     private String baseUrl;
     private RestTemplate restTemplate = new RestTemplate();
 
-    public TrueTransferService(String url){
-        this.baseUrl = url;
-    }
+    //public TrueTransferService(String url){
+        //this.baseUrl = url;
+   // }
 
 
     @Override
-    public void setTransfer(AuthenticatedUser authenticatedUser, Transfer transfer) {
+    public Transfer setTransfer(AuthenticatedUser authenticatedUser, Transfer transfer) {
         HttpHeaders header = new HttpHeaders();
         header.setContentType(MediaType.APPLICATION_JSON);
         header.setBearerAuth(authenticatedUser.getToken());
@@ -36,6 +38,7 @@ public class TrueTransferService implements TransferService{
         }catch(ResourceAccessException e){
             System.out.println(e.getMessage());
         }
+        return transfer;
     }
 
     @Override
@@ -53,8 +56,5 @@ public class TrueTransferService implements TransferService{
         return new Transfer[0];
     }
 
-    @Override
-    public void updateTransfer(AuthenticatedUser authenticatedUser, Transfer transfer) {
 
-    }
 }

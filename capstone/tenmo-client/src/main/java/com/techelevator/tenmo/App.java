@@ -1,12 +1,7 @@
 package com.techelevator.tenmo;
 
-import com.techelevator.tenmo.model.Account;
-import com.techelevator.tenmo.model.AuthenticatedUser;
-import com.techelevator.tenmo.model.Balance;
-import com.techelevator.tenmo.model.UserCredentials;
-import com.techelevator.tenmo.services.AccountService;
-import com.techelevator.tenmo.services.AuthenticationService;
-import com.techelevator.tenmo.services.ConsoleService;
+import com.techelevator.tenmo.model.*;
+import com.techelevator.tenmo.services.*;
 
 import java.math.BigDecimal;
 
@@ -16,6 +11,7 @@ public class App {
 
     private final ConsoleService consoleService = new ConsoleService();
     private final AuthenticationService authenticationService = new AuthenticationService(API_BASE_URL);
+    private final TrueTransferService transferService = new TrueTransferService();
     public AccountService accountService;
 
     private AuthenticatedUser currentUser;
@@ -108,7 +104,13 @@ public class App {
 		
 	}
 
-	private void sendBucks() {
+	private void sendBucks(AuthenticatedUser authenticatedUser, long Id) {
+        //create a new transfer
+        Transfer transfer = new Transfer();
+        BigDecimal transferByUser = consoleService.promptForBigDecimal(String.valueOf(transfer.getAmount()));
+        AuthenticatedUser acctFrom = currentUser;
+        Account transferToUser = accountService.getAccountById(authenticatedUser, Id);
+        Transfer transferFromApi = transferService.setTransfer(authenticatedUser, transferByUser);
 		// TODO Auto-generated method stub
 		
 	}
