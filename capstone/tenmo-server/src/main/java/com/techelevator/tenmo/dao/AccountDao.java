@@ -9,9 +9,9 @@ public interface AccountDao {
 
     Balance getBalance(String user);
 
-//    Account getUserById(long userId);
+    Account getAccountByAccountId(long accountId);
 
-    Account getAccountByUserId(Long userId);
+    Account getAccountByUserId(long userId);
 
     void updateBalance(Account account);
 

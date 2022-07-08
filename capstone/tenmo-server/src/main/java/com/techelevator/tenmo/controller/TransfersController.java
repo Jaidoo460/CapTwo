@@ -6,6 +6,7 @@ import com.techelevator.tenmo.dao.TransfersDao;
 import com.techelevator.tenmo.dao.UserDao;
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transfers;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -23,12 +24,13 @@ public class TransfersController {
         this.userDao = userDao;
     }
 
-    @RequestMapping(value = "/transfer/{id}", method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.CREATED)
+    @RequestMapping(path = "/transfer/{id}", method = RequestMethod.POST)
     public void transfer(@RequestBody Transfers transfer, @PathVariable int id) throws InsufficentBalanceException {
         //transfersDao.setTransfer(transfer);
         BigDecimal amountToTransfer = transfer.getAmount();
-        Account accountFrom = accountDao.getAccountByUserId(transfer.getAccountFrom());
-        Account accountTo = accountDao.getAccountByUserId(transfer.getAccountTo());
+        Account accountFrom = accountDao.getAccountByAccountId(transfer.getAccountFrom());
+        Account accountTo = accountDao.getAccountByAccountId(transfer.getAccountTo());
 
         accountFrom.getBalance().sendMoney(amountToTransfer);
         accountTo.getBalance().receiveMoney(amountToTransfer);

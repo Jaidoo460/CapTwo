@@ -8,25 +8,37 @@ import java.util.Objects;
 
 public class Account {
 
-    private Long accountId;
-    private Long userId;
+    private long accountId;
+    private long userId;
     private Balance balance;
 
     public Account(){
 
     }
 
-    public Account(Long accountId, Long userId, Balance balance) {
+    public Account(long accountId, long userId, Balance balance) {
         this.accountId = accountId;
         this.userId = userId;
         this.balance = balance;
     }
 
-    public Long getAccountId() {
+    public void setAccountId(long accountId) {
+        this.accountId = accountId;
+    }
+
+    public void setUserId(long userId) {
+        this.userId = userId;
+    }
+
+    public void setBalance(Balance balance) {
+        this.balance = balance;
+    }
+
+    public long getAccountId() {
         return accountId;
     }
 
-    public Long getUserId() {
+    public long getUserId() {
         return userId;
     }
 
