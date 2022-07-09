@@ -10,9 +10,11 @@ public interface TransfersDao {
     List<Transfers> findAll();
 
 
+
+
     Transfers setTransfer(Transfers transfer);
 
-    Transfers getTransferId(long transferId);
+    Transfers getTransferById(long transferId);
 
     List<Transfers> getTransfersForUser(long userId);
 

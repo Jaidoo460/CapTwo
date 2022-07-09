@@ -48,6 +48,12 @@ public class TrueTransferService implements TransferService{
 
     @Override
     public Transfer getTransferFromTransferId(AuthenticatedUser authenticatedUser, long transferId) {
+//        HttpEntity entity = createdHttpEntity(authenticatedUser);
+//
+//        Transfer transfer = null;
+//        try{
+//            transfer = restTemplate.execute(baseUrl + "/transfer/transfers/{id}", HttpMethod.GET, entity, Transfer.class);
+//        }
         return null;
     }
 
@@ -57,4 +63,11 @@ public class TrueTransferService implements TransferService{
     }
 
 
+    private HttpEntity createdHttpEntity(AuthenticatedUser authenticatedUser){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(authenticatedUser.getToken());
+        HttpEntity entity = new HttpEntity(headers);
+
+        return entity;
+    }
 }

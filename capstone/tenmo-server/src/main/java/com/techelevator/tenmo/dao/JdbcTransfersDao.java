@@ -30,7 +30,7 @@ public class JdbcTransfersDao implements TransfersDao {
             "INNER JOIN transfer_type tt ON t.transfer_type_id = tt.transfer_type_id " +
             "INNER JOIN transfer_status ts ON t.transfer_status_id = ts.transfer_status_id " +
             "INNER JOIN account aFrom on account_from = aFrom.account_id " +
-            "INNER JOIN account aTo on account_to = aTo.account_id";
+            "INNER JOIN account aTo on account_to = aTo.account_id ";
 
     public JdbcTransfersDao(JdbcTemplate jdbcTemplate, AccountDao accountDao, UserDao userDao) {
         this.jdbcTemplate = jdbcTemplate;
@@ -51,7 +51,7 @@ public class JdbcTransfersDao implements TransfersDao {
     }
 
     @Override
-    public Transfers getTransferId(long transferId) {
+    public Transfers getTransferById(long transferId) {
         Transfers transfer = null;
         String sql = SQL_SELECT_TRANSFER + "WHERE transfer_id = ?";
         SqlRowSet results = jdbcTemplate.queryForRowSet(sql, transferId);
@@ -64,12 +64,11 @@ public class JdbcTransfersDao implements TransfersDao {
     @Override
     public Transfers setTransfer(Transfers newTransfer) {
 
-        String sql = "INSERT INTO transfer (transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO transfer (transfer_type_id, transfer_status_id, account_from, account_to, amount) VALUES (?, ?, ?, ?, ?)";
 
-        Long transferId = getNextTransferId();
-        jdbcTemplate.update(sql,getNextTransferId(),2,2,newTransfer.getAccountFrom(), newTransfer.getAccountTo(), newTransfer.getAmount());
+        jdbcTemplate.update(sql,2,2,newTransfer.getAccountFrom(), newTransfer.getAccountTo(), newTransfer.getAmount());
 
-        return getTransferId(transferId);
+        return newTransfer;
     }
 
     @Override
@@ -78,20 +77,11 @@ public class JdbcTransfersDao implements TransfersDao {
         List<Transfers> transfers = new ArrayList<>();
         String sql = SQL_SELECT_TRANSFER + "WHERE (account_from IN (SELECT account_id FROM account WHERE user_id = ?) " +
                 "OR account_to IN (SELECT account_id FROM account WHERE user_id = ?))";
-        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, userId);
+        SqlRowSet results = jdbcTemplate.queryForRowSet(sql, userId, userId);
         while (results.next()) {
             transfers.add(mapRowToTransfer(results));
         }
         return transfers;
-    }
-
-    private long getNextTransferId(){
-        SqlRowSet nextIdResult = jdbcTemplate.queryForRowSet("SELECT nextval('seq_transfer_id')");
-        if(nextIdResult.next()){
-            return nextIdResult.getLong(1);
-        }else{
-            throw new RuntimeException("Sorry something happened while getting an ID");
-        }
     }
 
    private Transfers mapRowToTransfer(SqlRowSet rs){

@@ -12,9 +12,11 @@ public class App {
     private final ConsoleService consoleService = new ConsoleService();
     private final AuthenticationService authenticationService = new AuthenticationService(API_BASE_URL);
     private final TrueTransferService transferService = new TrueTransferService();
-    public AccountService accountService;
+    private final TrueAccountService accountService = new TrueAccountService();
+
 
     private AuthenticatedUser currentUser;
+    private Transfer transfer;
 
     public static void main(String[] args) {
         App app = new App();
@@ -91,10 +93,11 @@ public class App {
         Balance balance = accountService.getBalance(currentUser);
         System.out.println("Your current account balance is: " + balance);
 		// TODO Prints balance, still need to add complexity
-		
 	}
 
 	private void viewTransferHistory() {
+        Transfer transfers = transferService.setTransfer(currentUser, transfer);
+        System.out.println("Your transfer: " + transfers.getTransferId() + " has been sent");
 		// TODO Auto-generated method stub
 		
 	}
@@ -104,13 +107,8 @@ public class App {
 		
 	}
 
-	private void sendBucks(AuthenticatedUser authenticatedUser, long Id) {
-        //create a new transfer
-        Transfer transfer = new Transfer();
-        BigDecimal transferByUser = consoleService.promptForBigDecimal(String.valueOf(transfer.getAmount()));
-        AuthenticatedUser acctFrom = currentUser;
-        Account transferToUser = accountService.getAccountById(authenticatedUser, Id);
-        Transfer transferFromApi = transferService.setTransfer(authenticatedUser, transferByUser);
+	private void sendBucks() {
+
 		// TODO Auto-generated method stub
 		
 	}
