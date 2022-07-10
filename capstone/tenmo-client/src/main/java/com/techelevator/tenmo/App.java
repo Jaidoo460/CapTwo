@@ -90,14 +90,15 @@ public class App {
     }
 
 	private void viewCurrentBalance() {
-        Balance balance = accountService.getBalance(currentUser);
+        BigDecimal balance = accountService.getBalance(currentUser);
         System.out.println("Your current account balance is: " + balance);
 		// TODO Prints balance, still need to add complexity
 	}
 
 	private void viewTransferHistory() {
-        Transfer transfers = transferService.setTransfer(currentUser, transfer);
-        System.out.println("Your transfer: " + transfers.getTransferId() + " has been sent");
+        Transfer[] transfers = transferService.getAllTransfers(currentUser);
+//        System.out.println("Your transfer: " + " has been sent");
+        System.out.println(transfers);
 		// TODO Auto-generated method stub
 		
 	}

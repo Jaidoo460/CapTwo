@@ -7,13 +7,17 @@ import com.techelevator.util.BasicLogger;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigDecimal;
+
 public class TrueAccountService implements AccountService{
     private static final String API_BASE_URL = "http://localhost:8080";
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate = new RestTemplate();
+    private String authToken = null;
 
 //    public TrueAccountService(String baseUrl){
 //        this.restTemplate = new RestTemplate();
@@ -21,11 +25,14 @@ public class TrueAccountService implements AccountService{
 //    }
 
     @Override
-    public Balance getBalance(AuthenticatedUser authenticatedUser){
+    public BigDecimal getBalance(AuthenticatedUser authenticatedUser){
 
-        Balance balance = null;
+        BigDecimal balance = null;
         try{
-            balance = restTemplate.getForObject(API_BASE_URL + "/balance" + authenticatedUser,Balance.class);
+            ResponseEntity<Balance> response =
+                    restTemplate.exchange(API_BASE_URL + "/account/balance", HttpMethod.GET, createdHttpEntity(authenticatedUser), Balance.class);
+                    balance = response.getBody().getBalance();
+//            balance = restTemplate.getForObject(API_BASE_URL + "/account/balance", Balance.class);
         }catch (RestClientResponseException | ResourceAccessException e){
             BasicLogger.log(e.getMessage());
         }
@@ -64,4 +71,12 @@ public class TrueAccountService implements AccountService{
 
         return entity;
     }
+
+    private HttpEntity<Void> makeAuthEntity(){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(authToken);
+
+        return new HttpEntity<>(headers);
+    }
+
 }
